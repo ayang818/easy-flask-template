@@ -1,0 +1,2 @@
+class AnalysisBusiness(object):
+    pass

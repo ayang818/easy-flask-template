@@ -1,0 +1,2 @@
+class AccountBusiness(object):
+    pass

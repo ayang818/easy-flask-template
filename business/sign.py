@@ -1,0 +1,2 @@
+class SignBusiness(object):
+    pass
