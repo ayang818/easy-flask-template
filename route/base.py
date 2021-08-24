@@ -1,9 +1,10 @@
 import os
 import importlib
 import logging
-from common.decorator import set_authorization
+from common.decorator import set_authorization, autowire_param
 from common.role import Role
 
+base_url_rule_prefix = "/api"
 # 所有的 Route 必须以 Route 结尾，不然扫描不出来
 def register_routes(app):
     # scan test
@@ -26,12 +27,15 @@ def register_routes(app):
                     rule_name = '/' + rule_name
                 method_list = getattr(route_instance, 'methods', ['GET'])
                 try:
-                    # TODO 后续如果要给 process 加上默认拓展，在这里添加全局装饰器即可
+                    
+                    # 如果 Route 对象中 roles() 方法，那么就替换为 roles() 方法返回的权限
                     if getattr(route_instance, 'roles', None):
                         route_instance.process = set_authorization(roles=route_instance.roles())(route_instance.process)
                     else:
                         route_instance.process = set_authorization()(route_instance.process)
-                    app.add_url_rule(rule=rule_name, view_func=route_instance.process, endpoint=klass, methods=method_list)
+                    # 添加请求自动注入参数/req&resp自动打日志装饰器
+                    route_instance.process = autowire_param(route_instance.process)
+                    app.add_url_rule(rule=base_url_rule_prefix+rule_name, view_func=route_instance.process, endpoint=klass, methods=method_list)
                     logging.info("注册成功 %s", klass)
                 except AssertionError as e:
                     # 可能是载入了重复的 Route，直接pass即可
@@ -50,6 +54,9 @@ class BasicRoute(object):
         return "pong"
 
     def roles(self):
+        """
+        默认是所有人都可以访问，有鉴权接口需要 override 并重写
+        """
         return Role.all()
 
 
