@@ -59,7 +59,7 @@ def autowire_param(func):
                 }
         except SolarException as e:
             result = build_result(body=None, exception=e)
-        finally:
+        except:
             result = build_result(body=None, exception=SolarException(msg='error'))
         logging.info("resp=%s", result)
         return result

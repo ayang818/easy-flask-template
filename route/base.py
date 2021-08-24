@@ -2,7 +2,7 @@ import os
 import importlib
 import logging
 from common.decorator import set_authorization, autowire_param
-from common.role import Role
+from common.role import Role, RoleBuilder
 
 base_url_rule_prefix = "/api"
 # 所有的 Route 必须以 Route 结尾，不然扫描不出来
@@ -57,7 +57,7 @@ class BasicRoute(object):
         """
         默认是所有人都可以访问，有鉴权接口需要 override 并重写
         """
-        return Role.all()
+        return RoleBuilder.all()
 
 
 if __name__=='__main__':
