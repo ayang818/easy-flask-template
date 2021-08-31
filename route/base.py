@@ -55,6 +55,8 @@ class BasicRoute(object):
 
     def roles(self):
         """
+        TODO: 调试的时候所有人可访问，实际大部分接口支队 user 和 manager 开放，默认写
+        TODO: return RolerBuilder.append_manager().append_user()
         默认是所有人都可以访问，有鉴权接口需要 override 并重写
         """
         return RoleBuilder.all()

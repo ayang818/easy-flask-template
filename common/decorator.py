@@ -10,6 +10,9 @@ from common.util import SolarException, build_result
 
 # 需要鉴权的接口，process中需要加上 set_authorization 装饰器
 def set_authorization(roles):
+    """
+    对于需要健全的接口，在 Route 类里面重写 roles() 方法 
+    """
     def wrapper(func):
         @functools.wraps(func)
         def inner_wrapper(**kwargs):
@@ -36,6 +39,10 @@ def set_authorization(roles):
 
 
 def autowire_param(func):
+    """
+    1. 对于 get 和 post请求，自动将 json 字段 or post 字段打平到 调用函数的参数中
+    2. 统一包装response body（包括全局的异常处理）
+    """
     @functools.wraps(func)
     def wrapper():
         try:
@@ -52,16 +59,11 @@ def autowire_param(func):
                 logging.info("req=%s", kwargs)
                 result = build_result(func(**kwargs))
             else:
-                result = {
-                    "code": 405,
-                    "message": "method not allowed",
-                    "data": ""
-                }
+                result = build_result(body=None, exception=SolarException(code=405, msg='method not allowed'))
         except SolarException as e:
             result = build_result(body=None, exception=e)
         except:
             result = build_result(body=None, exception=SolarException(msg='error'))
         logging.info("resp=%s", result)
         return result
-
     return wrapper
